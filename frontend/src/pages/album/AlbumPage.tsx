@@ -29,6 +29,7 @@ const AlbumPage = () => {
 					 to-zinc-900 pointer-events-none"
             aria-hidden="true"
           />
+
           <div className="relative z-10">
             <div className="flex p-6 gap-6 pb-8">
               <img
