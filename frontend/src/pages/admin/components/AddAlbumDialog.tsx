@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { axiosInstance } from "@/lib/axios";
+import type { ApiError } from "@/types/api";
 import {
   Dialog,
   DialogContent,
@@ -62,8 +63,9 @@ const AddAlbumDialog = () => {
       setImageFile(null);
       setAlbumDialogOpen(false);
       toast.success("Album created successfully");
-    } catch (error: any) {
-      toast.error("Failed to create album: " + error.message);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      toast.error("Failed to create album: " + (apiError.response?.data?.message || apiError.message || 'Unknown error'));
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +114,7 @@ const AddAlbumDialog = () => {
             <label className="text-sm font-medium">Album Title</label>
             <Input
               value={newAlbum.title}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setNewAlbum({ ...newAlbum, title: e.target.value })
               }
               className="bg-zinc-800 border-zinc-700"
@@ -123,7 +125,7 @@ const AddAlbumDialog = () => {
             <label className="text-sm font-medium">Artist</label>
             <Input
               value={newAlbum.artist}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setNewAlbum({ ...newAlbum, artist: e.target.value })
               }
               className="bg-zinc-800 border-zinc-700"
@@ -135,10 +137,10 @@ const AddAlbumDialog = () => {
             <Input
               type="number"
               value={newAlbum.releaseYear}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setNewAlbum({
                   ...newAlbum,
-                  releaseYear: parseInt(e.target.value),
+                  releaseYear: parseInt(e.target.value) || new Date().getFullYear(),
                 })
               }
               className="bg-zinc-800 border-zinc-700"

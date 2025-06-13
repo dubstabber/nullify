@@ -1,5 +1,6 @@
 import { axiosInstance } from "@/lib/axios";
 import type { Message, User } from "@/types";
+import type { ApiError, TypedSocket } from "@/types/api";
 import { create } from "zustand";
 import { io } from "socket.io-client";
 
@@ -7,7 +8,7 @@ interface ChatStore {
   users: User[];
   isLoading: boolean;
   error: string | null;
-  socket: any;
+  socket: TypedSocket;
   isConnected: boolean;
   onlineUsers: Set<string>;
   userActivities: Map<string, string>;
@@ -41,21 +42,22 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   messages: [],
   selectedUser: null,
 
-  setSelectedUser: (user) => set({ selectedUser: user }),
+  setSelectedUser: (user: User | null) => set({ selectedUser: user }),
 
   fetchUsers: async () => {
     set({ isLoading: true, error: null });
     try {
       const response = await axiosInstance.get("/users");
       set({ users: response.data });
-    } catch (error: any) {
-      set({ error: error.response.data.message });
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      set({ error: apiError.response?.data?.message || 'An error occurred' });
     } finally {
       set({ isLoading: false });
     }
   },
 
-  initSocket: (userId) => {
+  initSocket: (userId: string) => {
     if (!get().isConnected) {
       socket.auth = { userId };
       socket.connect();
@@ -71,13 +73,13 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       });
 
       socket.on("user_connected", (userId: string) => {
-        set((state) => ({
+        set((state: ChatStore) => ({
           onlineUsers: new Set([...state.onlineUsers, userId]),
         }));
       });
 
       socket.on("user_disconnected", (userId: string) => {
-        set((state) => {
+        set((state: ChatStore) => {
           const newOnlineUsers = new Set(state.onlineUsers);
           newOnlineUsers.delete(userId);
           return { onlineUsers: newOnlineUsers };
@@ -85,19 +87,19 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       });
 
       socket.on("receive_message", (message: Message) => {
-        set((state) => ({
+        set((state: ChatStore) => ({
           messages: [...state.messages, message],
         }));
       });
 
       socket.on("message_sent", (message: Message) => {
-        set((state) => ({
+        set((state: ChatStore) => ({
           messages: [...state.messages, message],
         }));
       });
 
-      socket.on("activity_updated", ({ userId, activity }) => {
-        set((state) => {
+      socket.on("activity_updated", ({ userId, activity }: { userId: string; activity: string }) => {
+        set((state: ChatStore) => {
           const newActivities = new Map(state.userActivities);
           newActivities.set(userId, activity);
           return { userActivities: newActivities };
@@ -115,7 +117,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     }
   },
 
-  sendMessage: async (receiverId, senderId, content) => {
+  sendMessage: async (receiverId: string, senderId: string, content: string) => {
     const socket = get().socket;
     if (!socket) return;
 
@@ -127,8 +129,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     try {
       const response = await axiosInstance.get(`/users/messages/${userId}`);
       set({ messages: response.data });
-    } catch (error: any) {
-      set({ error: error.response.data.message });
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      set({ error: apiError.response?.data?.message || 'An error occurred' });
     } finally {
       set({ isLoading: false });
     }

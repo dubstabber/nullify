@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { axiosInstance } from "@/lib/axios";
 import { useMusicStore } from "@/stores/useMusicStore";
+import type { ApiError } from "@/types/api";
 import { Plus, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -90,8 +91,9 @@ const AddSongDialog = () => {
         image: null,
       });
       toast.success("Song added successfully");
-    } catch (error: any) {
-      toast.error("Failed to add song: " + error.message);
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      toast.error("Failed to add song: " + (apiError.response?.data?.message || apiError.message || 'Unknown error'));
     } finally {
       setIsLoading(false);
     }
@@ -120,8 +122,8 @@ const AddSongDialog = () => {
             accept="audio/*"
             ref={audioInputRef}
             hidden
-            onChange={(e) =>
-              setFiles((prev) => ({ ...prev, audio: e.target.files![0] }))
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFiles((prev) => ({ ...prev, audio: e.target.files?.[0] || null }))
             }
           />
 
@@ -130,8 +132,8 @@ const AddSongDialog = () => {
             ref={imageInputRef}
             className="hidden"
             accept="image/*"
-            onChange={(e) =>
-              setFiles((prev) => ({ ...prev, image: e.target.files![0] }))
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFiles((prev) => ({ ...prev, image: e.target.files?.[0] || null }))
             }
           />
 
@@ -187,7 +189,7 @@ const AddSongDialog = () => {
             <label className="text-sm font-medium">Title</label>
             <Input
               value={newSong.title}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setNewSong({ ...newSong, title: e.target.value })
               }
               className="bg-zinc-800 border-zinc-700"
@@ -198,7 +200,7 @@ const AddSongDialog = () => {
             <label className="text-sm font-medium">Artist</label>
             <Input
               value={newSong.artist}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setNewSong({ ...newSong, artist: e.target.value })
               }
               className="bg-zinc-800 border-zinc-700"
@@ -211,7 +213,7 @@ const AddSongDialog = () => {
               type="number"
               min="0"
               value={newSong.duration}
-              onChange={(e) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setNewSong({ ...newSong, duration: e.target.value || "0" })
               }
               className="bg-zinc-800 border-zinc-700"
@@ -222,7 +224,7 @@ const AddSongDialog = () => {
             <label className="text-sm font-medium">Album (Optional)</label>
             <Select
               value={newSong.album}
-              onValueChange={(value) =>
+              onValueChange={(value: string) =>
                 setNewSong({ ...newSong, album: value })
               }
             >
