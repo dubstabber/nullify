@@ -1,0 +1,21 @@
+export default {
+  transform: {},
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+    "^@/(.*)\\.js$": "<rootDir>/src/$1",
+    "^cloudinary$": "<rootDir>/tests/mock-modules/cloudinary.js",
+    "^@/models/song.model.js$": "<rootDir>/tests/mocks.js",
+    "^@/models/album.model.js$": "<rootDir>/tests/mocks.js",
+    "^@/models/user.model.js$": "<rootDir>/tests/mocks.js",
+  },
+  moduleFileExtensions: ["js", "json"],
+  testEnvironment: "node",
+  setupFilesAfterEnv: ["<rootDir>/tests/jest.setup.js"],
+  testMatch: ["**/tests/**/*.test.js"],
+  verbose: true,
+  testTimeout: 30000,
+  transformIgnorePatterns: [],
+  moduleDirectories: ["node_modules", "src", "tests"],
+  testPathIgnorePatterns: ["/node_modules/", "/dist/"],
+  injectGlobals: true,
+};

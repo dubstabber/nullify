@@ -52,7 +52,6 @@ export const useMusicStore = create<MusicStore>((set) => ({
       toast.success("Song deleted successfully");
     } catch (error: unknown) {
       const apiError = error as ApiError;
-      console.error("Error deleting song ", apiError);
       toast.error("Error deleting song");
     } finally {
       set({ isLoading: false });
@@ -74,7 +73,7 @@ export const useMusicStore = create<MusicStore>((set) => ({
       toast.success("Album deleted successfully");
     } catch (error: unknown) {
       const apiError = error as ApiError;
-      toast.error("Failed to delete album: " + (apiError.response?.data?.message || apiError.message || 'Unknown error'));
+      toast.error("Failed to delete album: " + (apiError.response?.data?.message || apiError.message || "Unknown error"));
     } finally {
       set({ isLoading: false });
     }
@@ -125,7 +124,7 @@ export const useMusicStore = create<MusicStore>((set) => ({
       set({ currentAlbum: response.data });
     } catch (error: unknown) {
       const apiError = error as ApiError;
-      set({ error: apiError.response?.data?.message || 'An error occurred' });
+      set({ error: apiError.response?.data?.message || "An error occurred" });
     } finally {
       set({ isLoading: false });
     }

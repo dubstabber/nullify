@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "seed:songs": "node src/seeds/songs.js",
-    "seed:albums": "node src/seeds/albums.js"
+    "seed:albums": "node src/seeds/albums.js",
+    "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest"
   },
   "keywords": [],
   "type": "module",
@@ -23,6 +24,10 @@
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "fs-extra": "^11.3.0",
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^9.0.5",
+    "nodemon": "^3.1.10",
+    "supertest": "^6.3.4"
   }
 }
