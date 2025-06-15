@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { Button, buttonVariants } from '../button';
-import { Slot } from '@radix-ui/react-slot';
+
 vi.mock('@radix-ui/react-slot', () => ({
   Slot: vi.fn(({ children, ...props }: React.PropsWithChildren<React.HTMLAttributes<HTMLDivElement>>) => (
     <div data-testid="slot-component" {...props}>

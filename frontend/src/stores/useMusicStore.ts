@@ -51,7 +51,6 @@ export const useMusicStore = create<MusicStore>((set) => ({
       }));
       toast.success("Song deleted successfully");
     } catch (error: unknown) {
-      const apiError = error as ApiError;
       toast.error("Error deleting song");
     } finally {
       set({ isLoading: false });
