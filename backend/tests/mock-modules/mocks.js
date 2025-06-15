@@ -1,11 +1,9 @@
 // Central mocks for all tests
 import { jest } from '@jest/globals';
 import mongoose from 'mongoose';
-
 // Properly structured mock functions for Song model
 export const findSort = jest.fn().mockReturnValue([]);
 export const findSortMock = jest.fn();
-
 export const findByIdExec = jest.fn().mockResolvedValue({
   _id: 'mock-song-id',
   title: 'Mock Song',
@@ -15,31 +13,24 @@ export const findByIdExec = jest.fn().mockResolvedValue({
   duration: 180
 });
 export const findByIdMock = jest.fn();
-
 export const aggregateMock = jest.fn();
-
 export const countDocumentsMock = jest.fn().mockResolvedValue(100);
-
 // In-memory stores to simulate database collections
 const _songsStore = [];
 const _albumsStore = [];
-
 // Helper function to convert ID to string
 const toIdString = (id) => {
   if (id instanceof mongoose.Types.ObjectId) return id.toString();
   return id;
 };
-
 // Helper function to check if string is a valid ObjectId
 const isObjectIdLike = (id) => {
   return /^[0-9a-fA-F]{24}$/.test(id);
 };
-
 // Helper function to generate a mock ID
 const genId = () => {
   return new mongoose.Types.ObjectId().toString();
 };
-
 // Helper function to sort by createdAt
 const sortByCreatedAt = (arr, order) => {
   return [...arr].sort((a, b) => {
@@ -48,7 +39,6 @@ const sortByCreatedAt = (arr, order) => {
     return order === -1 ? dateB - dateA : dateA - dateB;
   });
 };
-
 // More carefully constructed Song mock
 let lastSongInstance = null;
 export const Song = function(data) {
@@ -61,7 +51,6 @@ export const Song = function(data) {
   this.albumId = data.albumId;
   this.createdAt = new Date();
   this.updatedAt = new Date();
-  
   this.save = jest.fn(async () => {
     const requiredFields = ['title', 'artist', 'imageUrl', 'audioUrl', 'duration'];
     const missingFields = requiredFields.filter(field => !this[field]);
@@ -88,9 +77,7 @@ export const Song = function(data) {
   });
   lastSongInstance = this;
 };
-
 export const getLastSongInstance = () => lastSongInstance;
-
 // Mock for made-for-you songs
 const mockMadeForYouSongs = [
   {
@@ -103,24 +90,21 @@ const mockMadeForYouSongs = [
     releaseDate: new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
-    imageUrl: "https://example.com/image1.jpg",
-    audioUrl: "https://example.com/audio1.mp3"
+    imageUrl: "https://example.com//example.com/image1.jpg",
+    audioUrl: "https://example.com//example.com/audio1.mp3"
   }
 ];
-
 // Clear mock stores before each test
 export const clearMockStores = () => {
   _songsStore.length = 0;
   _albumsStore.length = 0;
 };
-
 Song.find = jest.fn((query = {}) => {
   let result = _songsStore.filter((s) =>
     Object.entries(query).every(([k, v]) => s[k] === v)
   );
   return Array.from(result);
 });
-
 Song.findExec = (query = {}) => {
   let result = _songsStore.filter((s) =>
     Object.entries(query).every(([k, v]) => s[k] === v)
@@ -140,7 +124,6 @@ Song.findExec = (query = {}) => {
   };
   return chain;
 };
-
 Song.findById = jest.fn((id) => {
   const idStr = toIdString(id);
   if (!isObjectIdLike(idStr)) {
@@ -163,7 +146,6 @@ Song.findById = jest.fn((id) => {
     }
   };
 });
-
 Song.create = jest.fn().mockImplementation(async (data) => {
   if (Array.isArray(data)) {
     const created = data.map((d) => new Song(d));
@@ -174,7 +156,6 @@ Song.create = jest.fn().mockImplementation(async (data) => {
   _songsStore.push(doc);
   return doc;
 });
-
 Song.findByIdAndUpdate = jest.fn((id, update) => {
   return {
     exec: () => {
@@ -185,7 +166,6 @@ Song.findByIdAndUpdate = jest.fn((id, update) => {
     }
   };
 });
-
 Song.findByIdAndDelete = jest.fn((id) => {
   return {
     exec: () => {
@@ -196,9 +176,7 @@ Song.findByIdAndDelete = jest.fn((id) => {
     }
   };
 });
-
 Song.countDocuments = jest.fn(() => Promise.resolve(_songsStore.length));
-
 Song.aggregate = jest.fn((pipeline) => {
   // Allow test to override this mock if needed
   if (Song.aggregate._mockImpl) {
@@ -222,11 +200,9 @@ Song.aggregate = jest.fn((pipeline) => {
   }
   return Promise.resolve(result);
 });
-
 // Album model mocks
 export const albumFindSort = jest.fn().mockReturnValue([]);
 export const albumFindSortMock = jest.fn();
-
 export const albumPopulateExec = jest.fn().mockResolvedValue({
   _id: 'mock-album-id',
   title: 'Mock Album',
@@ -236,9 +212,7 @@ export const albumPopulateExec = jest.fn().mockResolvedValue({
 });
 export const albumPopulate = jest.fn().mockReturnValue({ exec: albumPopulateExec });
 export const albumFindByIdMock = jest.fn();
-
 export const albumCountDocumentsMock = jest.fn().mockResolvedValue(25);
-
 // More carefully constructed Album mock
 let lastAlbumInstance = null;
 export const Album = function(data) {
@@ -249,7 +223,6 @@ export const Album = function(data) {
   this.songs = data.songs || [];
   this.createdAt = new Date();
   this.updatedAt = new Date();
-  
   this.save = jest.fn(async () => {
     const requiredFields = ['title', 'artist', 'imageUrl'];
     const missingFields = requiredFields.filter(field => !this[field]);
@@ -276,16 +249,13 @@ export const Album = function(data) {
   });
   lastAlbumInstance = this;
 };
-
 export const getLastAlbumInstance = () => lastAlbumInstance;
-
 Album.find = jest.fn((query = {}) => {
   let result = _albumsStore.filter((a) =>
     Object.entries(query).every(([k, v]) => a[k] === v)
   );
   return Array.from(result);
 });
-
 Album.findExec = (query = {}) => {
   let result = _albumsStore.filter((a) =>
     Object.entries(query).every(([k, v]) => a[k] === v)
@@ -305,7 +275,6 @@ Album.findExec = (query = {}) => {
   };
   return chain;
 };
-
 Album.findById = jest.fn((id) => {
   const idStr = toIdString(id);
   if (!isObjectIdLike(idStr)) {
@@ -345,7 +314,6 @@ Album.findById = jest.fn((id) => {
     exec: () => Promise.resolve(album)
   };
 });
-
 Album.create = jest.fn().mockImplementation(async (data) => {
   if (Array.isArray(data)) {
     const created = data.map((d) => new Album(d));
@@ -356,7 +324,6 @@ Album.create = jest.fn().mockImplementation(async (data) => {
   _albumsStore.push(doc);
   return doc;
 });
-
 Album.findByIdAndUpdate = jest.fn((id, update) => {
   return {
     exec: () => {
@@ -367,7 +334,6 @@ Album.findByIdAndUpdate = jest.fn((id, update) => {
     }
   };
 });
-
 Album.findByIdAndDelete = jest.fn((id) => {
   return {
     exec: () => {
@@ -378,13 +344,10 @@ Album.findByIdAndDelete = jest.fn((id) => {
     }
   };
 });
-
 Album.countDocuments = jest.fn(() => Promise.resolve(_albumsStore.length));
-
 // User model mocks
 export const userFindExec = jest.fn().mockResolvedValue([]);
 export const userFindMock = jest.fn().mockReturnValue({ exec: userFindExec });
-
 export const userFindByIdExec = jest.fn().mockResolvedValue({
   _id: 'mock-user-id',
   username: 'mockuser',
@@ -393,7 +356,6 @@ export const userFindByIdExec = jest.fn().mockResolvedValue({
   isAdmin: false
 });
 export const userFindByIdMock = jest.fn().mockReturnValue({ exec: userFindByIdExec });
-
 export const userFindOneExec = jest.fn().mockResolvedValue({
   _id: 'mock-user-id',
   username: 'mockuser',
@@ -403,9 +365,7 @@ export const userFindOneExec = jest.fn().mockResolvedValue({
   verifyPassword: jest.fn().mockReturnValue(true)
 });
 export const userFindOneMock = jest.fn().mockReturnValue({ exec: userFindOneExec });
-
 export const userCountDocumentsMock = jest.fn().mockResolvedValue(50);
-
 export const User = {
   find: userFindMock,
   findById: userFindByIdMock,
@@ -413,7 +373,6 @@ export const User = {
   findOne: userFindOneMock,
   countDocuments: userCountDocumentsMock
 };
-
 // Mock Cloudinary library
 export const cloudinary = {
   uploadImage: jest.fn().mockResolvedValue({
@@ -427,39 +386,36 @@ export const cloudinary = {
   }),
   deleteAudio: jest.fn().mockResolvedValue({ result: 'ok' })
 };
-
 const mockSong = {
   _id: "mock-song-id",
   title: "Mock Song",
   artist: "Mock Artist",
-  audioUrl: "https://example.com/mock-audio.mp3",
-  imageUrl: "https://example.com/mock-image.jpg",
+  audioUrl: "https://example.com//example.com/mock-audio.mp3",
+  imageUrl: "https://example.com//example.com/mock-image.jpg",
   createdAt: new Date(),
   save: jest.fn().mockResolvedValue({
     _id: "mock-song-id",
     title: "Mock Song",
     artist: "Mock Artist",
-    audioUrl: "https://example.com/mock-audio.mp3",
-    imageUrl: "https://example.com/mock-image.jpg",
+    audioUrl: "https://example.com//example.com/mock-audio.mp3",
+    imageUrl: "https://example.com//example.com/mock-image.jpg",
     createdAt: new Date(),
   }),
 };
-
 const mockAlbum = {
   _id: "mock-album-id",
   title: "Mock Album",
   artist: "Mock Artist",
-  imageUrl: "https://example.com/mock-album-image.jpg",
+  imageUrl: "https://example.com//example.com/mock-album-image.jpg",
   songs: [mockSong],
   save: jest.fn().mockResolvedValue({
     _id: "mock-album-id",
     title: "Mock Album",
     artist: "Mock Artist",
-    imageUrl: "https://example.com/mock-album-image.jpg",
+    imageUrl: "https://example.com//example.com/mock-album-image.jpg",
     songs: [mockSong],
   }),
 };
-
 // Mock Song model
 export const Song = {
   find: () => ({
@@ -468,7 +424,6 @@ export const Song = {
   findById: findByIdMock,
   aggregate: aggregateMock,
 };
-
 // Mock Album model
 export const Album = {
   find: () => ({
@@ -478,18 +433,15 @@ export const Album = {
     populate: albumFindByIdMock,
   }),
 };
-
 // Mock model constructors
 export const createMockSong = () => ({
   ...mockSong,
   save: jest.fn().mockResolvedValue(mockSong),
 });
-
 export const createMockAlbum = () => ({
   ...mockAlbum,
   save: jest.fn().mockResolvedValue(mockAlbum),
 });
-
 // Mock storage operations
 export const mockStorage = {
   uploadAudio: jest.fn().mockResolvedValue({ url: 'https://example.com/mock-audio.mp3' }),

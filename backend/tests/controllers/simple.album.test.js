@@ -1,11 +1,7 @@
 import { jest } from '@jest/globals';
-
-// Create direct test mocks
 const mockFind = jest.fn();
 const mockFindById = jest.fn();
 const mockPopulate = jest.fn();
-
-// Create controller functions with mock implementations
 const getAllAlbums = async (req, res, next) => {
   try {
     const albums = await mockFind();
@@ -14,13 +10,11 @@ const getAllAlbums = async (req, res, next) => {
     next(error);
   }
 };
-
 const getAlbumById = async (req, res, next) => {
   try {
     const { albumId } = req.params;
     mockFindById(albumId);
     const album = await mockPopulate();
-    
     if (!album) {
       return res.status(404).json({ message: 'Album not found' });
     }
@@ -29,102 +23,61 @@ const getAlbumById = async (req, res, next) => {
     next(error);
   }
 };
-
 describe('Album Controller', () => {
-  // Setup request, response, and next function mocks
   let req, res, next;
-  
   beforeEach(() => {
     req = {
       params: { albumId: 'album123' }
     };
-    
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn()
     };
-    
     next = jest.fn();
-    
-    // Reset all mocks between tests
     jest.clearAllMocks();
   });
-
   describe('getAllAlbums', () => {
     test('should return all albums', async () => {
-      // Mock data
       const albums = [
         { _id: 'album1', title: 'Test Album 1' },
         { _id: 'album2', title: 'Test Album 2' }
       ];
-      
-      // Setup mock return
       mockFind.mockResolvedValue(albums);
-      
-      // Call function
       await getAllAlbums(req, res, next);
-      
-      // Assertions
       expect(mockFind).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(albums);
     });
-    
     test('should handle errors', async () => {
-      // Setup error case
       const error = new Error('Server error');
       mockFind.mockRejectedValue(error);
-      
-      // Call function
       await getAllAlbums(req, res, next);
-      
-      // Assertions
       expect(mockFind).toHaveBeenCalled();
       expect(next).toHaveBeenCalledWith(error);
     });
   });
-  
   describe('getAlbumById', () => {
     test('should return a single album by ID', async () => {
-      // Mock data
       const album = { _id: 'album123', title: 'Test Album' };
-      
-      // Setup mock return
       mockPopulate.mockResolvedValue(album);
-      
-      // Call function
       await getAlbumById(req, res, next);
-      
-      // Assertions
       expect(mockFindById).toHaveBeenCalledWith('album123');
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(album);
     });
-    
     test('should return 404 if album not found', async () => {
-      // Setup mock for not found case
       mockPopulate.mockResolvedValue(null);
-      
-      // Call function
       await getAlbumById(req, res, next);
-      
-      // Assertions
       expect(mockFindById).toHaveBeenCalledWith('album123');
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: 'Album not found' });
     });
-    
     test('should handle errors', async () => {
-      // Setup error case
       const error = new Error('Server error');
       mockFindById.mockImplementation(() => {
         throw error;
       });
-      
-      // Call function
       await getAlbumById(req, res, next);
-      
-      // Assertions
       expect(mockFindById).toHaveBeenCalledWith('album123');
       expect(next).toHaveBeenCalledWith(error);
     });

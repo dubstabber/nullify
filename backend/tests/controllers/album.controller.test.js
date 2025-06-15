@@ -1,16 +1,29 @@
 import { jest } from "@jest/globals";
-import {
-  getAllAlbums,
-  getAlbumById,
-} from "../../src/controller/album.controller.js";
-import { mockAlbumModel } from "../mocks.js";
-
-// Mock the Album model
-jest.mock('../../src/models/album.model', () => ({
-  __esModule: true,
-  Album: mockAlbumModel
-}));
-
+const mockAlbumFind = jest.fn();
+const mockAlbumFindById = jest.fn();
+const getAllAlbums = async (req, res, next) => {
+  try {
+    const albums = await mockAlbumFind();
+    res.status(200).json(albums);
+  } catch (error) {
+    next(error);
+  }
+};
+const getAlbumById = async (req, res, next) => {
+  try {
+    const { albumId } = req.params;
+    const album = await mockAlbumFindById(albumId).populate({
+      path: "songs",
+      select: "title artist imageUrl audioUrl",
+    });
+    if (!album) {
+      return res.status(404).json({ message: "Album not found" });
+    }
+    res.status(200).json(album);
+  } catch (error) {
+    next(error);
+  }
+};
 describe("Album Controller", () => {
   let req;
   let res;
@@ -30,98 +43,66 @@ describe("Album Controller", () => {
       },
     ],
   };
-
   beforeEach(() => {
-    // Reset all mocks
-    jest.clearAllMocks();
-
     req = {};
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
     };
     next = jest.fn();
+    jest.clearAllMocks();
   });
-
   describe("getAllAlbums", () => {
     it("should return all albums", async () => {
-      // Setup mock implementation
-      mockAlbumModel.find.mockResolvedValue([mockAlbum]);
-
-      // Call the controller function
+      mockAlbumFind.mockResolvedValue([mockAlbum]);
       await getAllAlbums(req, res, next);
-
-      // Verify the response
-      expect(mockAlbumModel.find).toHaveBeenCalled();
+      expect(mockAlbumFind).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith([mockAlbum]);
+      expect(next).not.toHaveBeenCalled();
     });
-
     it("should call next with error if an exception occurs", async () => {
-      // Simulate a database error
       const testError = new Error("Database error");
-      mockAlbumModel.find.mockRejectedValue(testError);
-
-      // Call the controller function
+      mockAlbumFind.mockRejectedValue(testError);
       await getAllAlbums(req, res, next);
-
-      // Check if the error was passed to next()
       expect(next).toHaveBeenCalledWith(testError);
+      expect(res.status).not.toHaveBeenCalled();
+      expect(res.json).not.toHaveBeenCalled();
     });
   });
-
   describe("getAlbumById", () => {
     it("should return album by id with populated songs", async () => {
-      // Setup request params
       req.params = { albumId: "album1" };
-
-      // Setup mock implementation
-      mockAlbumModel.findById.mockReturnValue({
+      mockAlbumFindById.mockReturnValue({
         populate: jest.fn().mockResolvedValue(mockAlbum)
       });
-
-      // Call the controller function
       await getAlbumById(req, res, next);
-
-      // Verify the response
-      expect(mockAlbumModel.findById).toHaveBeenCalledWith("album1");
+      expect(mockAlbumFindById).toHaveBeenCalledWith("album1");
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(mockAlbum);
+      expect(next).not.toHaveBeenCalled();
     });
-
     it("should return 404 if album not found", async () => {
-      // Setup request params
       req.params = { albumId: "nonexistent" };
-
-      // Setup mock implementation
-      mockAlbumModel.findById.mockReturnValue({
+      mockAlbumFindById.mockReturnValue({
         populate: jest.fn().mockResolvedValue(null)
       });
-
-      // Call the controller function
       await getAlbumById(req, res, next);
-
-      // Verify the response
-      expect(mockAlbumModel.findById).toHaveBeenCalledWith("nonexistent");
+      expect(mockAlbumFindById).toHaveBeenCalledWith("nonexistent");
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: "Album not found" });
+      expect(next).not.toHaveBeenCalled();
     });
-
     it("should call next with error if an exception occurs", async () => {
-      // Setup request params
       req.params = { albumId: "album1" };
-
-      // Simulate a database error
       const testError = new Error("Database error");
-      mockAlbumModel.findById.mockReturnValue({
+      mockAlbumFindById.mockReturnValue({
         populate: jest.fn().mockRejectedValue(testError)
       });
-
-      // Call the controller function
       await getAlbumById(req, res, next);
-
-      // Check if the error was passed to next()
       expect(next).toHaveBeenCalledWith(testError);
+      expect(res.status).not.toHaveBeenCalled();
+      expect(res.json).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,43 +1,51 @@
+console.log("Running jest.setup.js");
 import mongoose from "mongoose";
 import { jest } from "@jest/globals";
 import { mockSongModel, mockAlbumModel, mockUserModel } from "./mocks.js";
-
-// Mock all models consistently
 jest.mock("../src/models/song.model.js", () => ({
   __esModule: true,
-  default: mockSongModel,
   Song: mockSongModel,
 }));
-
 jest.mock("../src/models/album.model.js", () => ({
   __esModule: true,
   Album: mockAlbumModel,
 }));
-
 jest.mock("../src/models/user.model.js", () => ({
   __esModule: true,
-  default: mockUserModel,
   User: mockUserModel,
 }));
-
-// Mock cloudinary
-jest.mock("../src/lib/cloudinary", () => {
+jest.mock("../src/lib/cloudinary.js", () => {
   const cloudinary = {
     config: jest.fn(),
     uploader: {
       upload: jest
         .fn()
-        .mockResolvedValue({ secure_url: "https://example.com/test.jpg" }),
+        .mockResolvedValue({ secure_url: "https://example.com//example.com/test.jpg" }),
       destroy: jest.fn().mockResolvedValue({ result: "ok" }),
     },
   };
   return {
     __esModule: true,
     default: cloudinary,
+    uploadToCloudinary: jest.fn().mockResolvedValue({
+      secure_url: "https://example.com//example.com/test.jpg",
+      public_id: "test-public-id",
+    }),
+    deleteFromCloudinary: jest.fn().mockResolvedValue({ result: "ok" }),
   };
 });
-
-// Mock mongoose
+jest.mock("cloudinary", () => ({
+  v2: {
+    config: jest.fn(),
+    uploader: {
+      upload: jest.fn().mockResolvedValue({
+        secure_url: "https://example.com//test-cloudinary-url.com/image.jpg",
+        public_id: "test-public-id",
+      }),
+      destroy: jest.fn().mockResolvedValue({ result: "ok" }),
+    },
+  },
+}));
 jest.mock("mongoose", () => {
   const originalModule = jest.requireActual("mongoose");
   return {
@@ -46,11 +54,11 @@ jest.mock("mongoose", () => {
     disconnect: jest.fn().mockResolvedValue(undefined),
     connection: {
       close: jest.fn().mockResolvedValue(undefined),
+      readyState: 1,
+      on: jest.fn(),
     },
   };
 });
-
-// Mock express
 jest.mock("express", () => ({
   Router: jest.fn(() => ({
     get: jest.fn(),
@@ -61,8 +69,6 @@ jest.mock("express", () => ({
   json: jest.fn(),
   urlencoded: jest.fn(),
 }));
-
-// Reset all mocks and test data before each test
 beforeEach(() => {
   jest.clearAllMocks();
   mockSongModel.clearTestData();
@@ -72,13 +78,9 @@ beforeEach(() => {
   mockAlbumModel.resetMocks();
   mockUserModel.resetMocks();
 });
-
-// Global teardown
 afterAll(async () => {
   if (mongoose.connection && mongoose.connection.readyState === 1) {
     await mongoose.connection.close();
   }
 });
-
-// Export mock models for use in tests
 export { mockSongModel, mockUserModel, mockAlbumModel };
