@@ -79,30 +79,6 @@ The goal of this project is to showcase production-ready code, modern tooling an
 | Testing            | Vitest • Jest • Supertest                                |
 | Tooling            | ESLint • Prettier • Husky • Lint-staged                  |
 
----
-
-## Architecture
-
-```mermaid
-flowchart TD
-  subgraph Frontend (Vite + React)
-    A[Clerk Provider] --> B[Auth Store]
-    B --> C[Pages / Components]
-    C --> D[Zustand Stores]
-    D -->|REST| E[Axios Service]
-    C -->|WS| F(Socket.io Client)
-  end
-
-  subgraph Backend (Express)
-    G[Express API] -->|HTTP| H(MongoDB)
-    G -->|WS| I[Socket.io Server]
-    G --> J[Cloudinary SDK]
-    G --> K[Clerk Middleware]
-  end
-
-  F --- I
-  E --- G
-```
 
 > The **monorepo** is divided into two top-level folders: `frontend/` and `backend/` – each can run & deploy independently.
 
@@ -212,9 +188,3 @@ Test coverage reports are generated in `coverage/` folders.
 | `CLOUDINARY_*` | Cloudinary credentials for media uploads |
 | `CLERK_SECRET_KEY` | Clerk backend API key |
 | `VITE_CLERK_PUBLISHABLE_KEY` | Clerk frontend publishable key |
-
----
-
-## License
-
-This project is released under the **MIT License** – see the [LICENSE](LICENSE) file for details. 
